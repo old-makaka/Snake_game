@@ -1,3 +1,6 @@
+import objects
+
+
 def init():
     import pygame
     import random
@@ -5,93 +8,41 @@ def init():
 
     import Globals
 
-    Globals.init_colours()
     pygame.init()
 
-    sc = pygame.display.set_mode((800, 600))
+    Globals.init_colours()
+    Globals.init_fonts()
+    Globals.init_screen()
+    Globals.init_leaderboard()
+
     pygame.display.set_caption('Snake Game')
     clock = pygame.time.Clock()
 
-    field = (20, 100, 780, 580)
-
-    font1 = pygame.font.SysFont('freesanbold.ttf', 30)
-    font2 = pygame.font.SysFont('freesanbold.ttf', 50)
-    font3 = pygame.font.SysFont('freesanbold.ttf', 70)
-
     score_level = [5, 10, 20, 40, 60]
 
-    def score_draw(score, score_level, level):
-        out = font1.render('Your score: ' + str(score) + ' / ' + str(score_level[level - 1]), True, Globals.text)
-        sc.blit(out, [20, 10])
+    def score_draw(score, score_level_, level):
+        out = Globals.font1.render('Your score: ' + str(score) + ' / ' +
+                                   str(score_level_[level - 1]), True, Globals.text)
+        Globals.sc.blit(out, [20, 10])
 
     def time_draw(t):
-        out = font1.render('Time: ' + str(t), True, Globals.text)
-        sc.blit(out, [20, 50])
+        out = Globals.font1.render('Time: ' + str(t), True, Globals.text)
+        Globals.sc.blit(out, [20, 50])
 
     def level_draw(level):
-        out = font1.render('Level: ' + str(level), True, Globals.text)
-        sc.blit(out, [700, 10])
+        out = Globals.font1.render('Level: ' + str(level), True, Globals.text)
+        Globals.sc.blit(out, [700, 10])
 
     def snake_draw(snake):
         for i in range(len(snake)):
             x = snake[i][0]
             y = snake[i][1]
-            pygame.draw.polygon(sc, Globals.snake1, [[x + 4, y], [x + 16, y], [x + 20, y + 4], [x + 20, y + 16],
-                                             [x + 16, y + 20], [x + 4, y + 20], [x, y + 16], [x, y + 4]])
+            pygame.draw.polygon(Globals.sc, Globals.snake1, [[x + 4, y], [x + 16, y],
+                                                             [x + 20, y + 4], [x + 20, y + 16],
+                                                             [x + 16, y + 20], [x + 4, y + 20],
+                                                             [x, y + 16], [x, y + 4]])
             if i != 0:
-                pygame.draw.circle(sc, Globals.snake2, [x + 10, y + 10], 8)
-
-    def apple_draw(apple):
-        x = apple[0]
-        y = apple[1]
-        pygame.draw.circle(sc, Globals.red, [x + 10, y + 10], 9)
-        pygame.draw.polygon(sc, Globals.brown, [[x + 4, y], [x + 12, y + 2], [x + 10, y + 8]])
-
-    def gen_apple(ap, s):
-        ok = False
-        while not ok:
-            ok = True
-            ap[0] = random.randint(0, 37) * 20 + 20
-            ap[1] = random.randint(0, 23) * 20 + 100
-            for a in s:
-                if a[0] == ap[0] and a[1] == ap[1]:
-                    ok = False
-
-    def start_screen_draw():
-        out = font2.render('WELCOME TO THE SNAKE GAME!', True, Globals.text)
-        sc.blit(out, [130, 200])
-        out = font1.render('You need to pass 5 levels to win', True, Globals.text)
-        sc.blit(out, [250, 280])
-        out = font1.render('Press "SPACE" button to continue', True, Globals.snake2)
-        sc.blit(out, [240, 340])
-
-    def start_level_screen_draw(level, total_score):
-        out = font3.render('LEVEL ' + str(level), True, Globals.text)
-        sc.blit(out, [305, 200])
-        out = font1.render('Current score: ' + str(total_score), True, Globals.text)
-        sc.blit(out, [320, 300])
-        out = font1.render('Press "SPACE" button to start the game', True, Globals.snake2)
-        sc.blit(out, [230, 350])
-
-    def end_win_screen_draw(total_score, total_time):
-        out = font2.render('CONGRATULATIONS! YOU WIN!', True, Globals.text)
-        sc.blit(out, [130, 160])
-        out = font1.render('Total score: ' + str(total_score), True, Globals.text)
-        sc.blit(out, [320, 240])
-        out = font1.render('Total time: ' + str(total_time), True, Globals.text)
-        sc.blit(out, [320, 300])
-        out = font1.render('Press "q" key to quit or "r" key to restart', True, Globals.snake2)
-        sc.blit(out, [210, 360])
-
-    def end_loose_screen_draw(total_score, total_time):
-        out = font2.render('YOU LOST!', True, Globals.text)
-        sc.blit(out, [290, 160])
-        out = font1.render('Total score: ' + str(total_score), True, Globals.text)
-        sc.blit(out, [320, 220])
-        out = font1.render('Total time: ' + str(total_time), True, Globals.text)
-        sc.blit(out, [320, 280])
-        out = font1.render('Press "q" key to quit or "r" key to restart', True, Globals.snake2)
-        sc.blit(out, [210, 340])
+                pygame.draw.circle(Globals.sc, Globals.snake2, [x + 10, y + 10], 8)
 
     def loop():
         total_score = 0
@@ -102,27 +53,17 @@ def init():
             if not alive:
                 break
 
-            level_started = False
-            while not level_started:
-                sc.fill(Globals.light_gray)
-                start_level_screen_draw(level, total_score)
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        quit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE:
-                            level_started = True
+            objects.screen_show('level', level, total_score, total_time)
 
             head = [0, 0]
             head[0] = random.randint(0, 37) * 20 + 20
             head[1] = random.randint(0, 23) * 20 + 100
 
-            apple = [0, 0]
             snake = list()
             snake.append([head[0], head[1]])
-            gen_apple(apple, snake)
+            apple = objects.Apple(snake)
+            star_exist = False
+            star = None
 
             t1 = pygame.time.get_ticks()
             time = 0
@@ -150,6 +91,10 @@ def init():
                             y_change = 20
                             x_change = 0
 
+                ban = snake + [apple.bonus_pixels]
+                if star_exist:
+                    ban += [star.bonus_pixels]
+
                 head[0] += x_change
                 head[1] += y_change
                 if head[0] < 0 or head[0] > 760 or head[1] < 100 or head[1] > 560:
@@ -157,10 +102,19 @@ def init():
                     break
 
                 fed = False
-                if head[0] == apple[0] and head[1] == apple[1]:
+                if head[0] == apple.bonus_pixels[0] and head[1] == apple.bonus_pixels[1]:
                     score += 1
-                    gen_apple(apple, snake)
+                    apple = objects.Apple(ban)
+                    if random.randint(1, 10) == 5:
+                        star_exist = True
+                        star = objects.Star(ban)
+                    else:
+                        star_exist = False
                     fed = True
+
+                if star_exist and head[0] == star.bonus_pixels[0] and head[1] == star.bonus_pixels[1]:
+                    score += 5
+                    star_exist = False
 
                 snake.insert(0, [head[0], head[1]])
                 if not fed:
@@ -174,63 +128,33 @@ def init():
                 t2 = pygame.time.get_ticks()
                 time = (t2 - t1) // 1000
 
-                sc.fill(Globals.white)
-                pygame.draw.rect(sc, Globals.sand, (20, 100, 760, 480))
+                Globals.sc.fill(Globals.white)
+                pygame.draw.rect(Globals.sc, Globals.sand, (20, 100, 760, 480))
                 snake_draw(snake)
                 score_draw(score, score_level, level)
                 level_draw(level)
                 time_draw(time)
-                apple_draw(apple)
+                apple.visualize()
+                if star_exist:
+                    star.visualize()
                 pygame.display.update()
                 clock.tick(int(5 + math.sqrt(level) * math.sqrt(score)))
 
             total_score += score
             total_time += time
 
+        objects.leaderboard_update(total_score, total_time)
+
         if alive:
-            while True:
-                sc.fill(Globals.light_gray)
-                end_win_screen_draw(total_score, total_time)
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        quit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            return
-                        if event.key == pygame.K_r:
-                            loop()
-                            return
+            objects.screen_show('win', 0, total_score, total_time)
 
         else:
-            while True:
-                sc.fill(Globals.light_gray)
-                end_loose_screen_draw(total_score, total_time)
-                pygame.display.update()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        quit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            return
-                        if event.key == pygame.K_r:
-                            loop()
-                            return
+            objects.screen_show('loose', 0, total_score, total_time)
 
-    started = False
-    while not started:
-        sc.fill(Globals.light_gray)
-        start_screen_draw()
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    started = True
+        loop()
+
+    objects.screen_show('start', 0, 0, 0)
+    objects.screen_show('colour_choice', 0, 0, 0)
 
     loop()
 
